@@ -1,6 +1,3 @@
-import "core-js/fn/array/from";
-import "core-js/fn/promise";
-
 (function(window, document) {
     const defaults = {
         async: true,
@@ -10,7 +7,7 @@ import "core-js/fn/promise";
         appendToHead: false
     };
 
-    const docScripts = Array.from(document.scripts).filter((script) => Boolean(script.src));
+    const docScripts = Array.prototype.slice.call(document.scripts).filter((script) => Boolean(script.src));
     const scriptTemplate = document.createElement("script");
     const head = document.head;
     const body = document.body || head;
@@ -24,15 +21,15 @@ import "core-js/fn/promise";
     window.inscript = window.inscript || function inscript(scripts, validate, options) {
         const scriptsType = typeof (scripts);
 
-        if (!scriptsType.test(/String|Array/)) {
+        if (!/string|array/.test(scriptsType)) {
             new Error("Scripts are not provided or of the wrong type");
         }
 
         const config = Object.assign({}, defaults, options);
         let chain = [];
 
-        if ("String" === scriptsType) {
-            chain.push[scripts];
+        if ("string" === scriptsType) {
+            chain.push(scripts);
         }
 
         const promiseChain = chain.map((script) => loadScript(script, validate, config));
@@ -47,9 +44,10 @@ import "core-js/fn/promise";
      * @param {Boolean} isShallow
      */
     function isScriptLoaded(src, isShallow) {
+        const cleanPath = src.replace(/\.+/, "");
         return Boolean(
             docScripts.filter((script) =>
-                isShallow ? (script.src.lastIndexOf(src) >= 0) : (script.src === src)
+                isShallow ? (script.src.lastIndexOf(cleanPath) >= 0) : (script.src === src)
             ).length
         );
     }
@@ -60,26 +58,26 @@ import "core-js/fn/promise";
      * @param {Object} config
      * @returns {Promise}
      */
-    function loadScript(src, config) {
-        if (typeof (src) === "Array") {
-            return window.inscript(src, validate, options);
+    function loadScript(src, validate, config) {
+        if (Array.isArray(src)) {
+            return window.inscript(src, validate, config);
         }
 
         return new Promise((accept, reject) => {
-            const shouldValidate = typeof (validate) === "Function";
-            const newScript = scriptTemplate.clone(false);
+            const shouldValidate = typeof (validate) === "function";
+            const newScript = scriptTemplate.cloneNode(false);
 
-            if (config.preventDuplicates && isScriptLoaded(src, conf.shallowScan)) {
-                accept();
+            if (config.preventDuplicates && isScriptLoaded(src, config.shallowScan)) {
+                accept(src);
                 return;
             }
 
             newScript.onload = function() {
                 if (shouldValidate && !validate(src)) {
-                    reject();
+                    reject(`Unable to validate script ${ src }`);
                 }
 
-                accept();
+                accept(src);
                 newScript.onload = null;
             };
 
@@ -94,4 +92,4 @@ import "core-js/fn/promise";
         });
     }
 
-})(window, documnt);
+})(window, document);
