@@ -7,13 +7,24 @@
 
 <body>
     Inscript test
+    <br/>
     <button id="btnLoadScripts">Load Scipts</button>
+    <br/>    
+    <button id="btnLoadSequence">Load Sequence</button>
     <script>
         var btn = document.getElementById("btnLoadScripts");
 
         btn.addEventListener("click", function() {
             window.inscript(["./scripts/script1.js", "./scripts/script2.js", "./scripts/script3.js"]).then(function(script) {
                 console.log("loaded:", script);
+            });
+        });
+        
+        var btn2 = document.getElementById("btnLoadSequence");
+
+        btn2.addEventListener("click", function() {
+            window.inscript([["./scripts/script4.js", "./scripts/script5.js"], "./scripts/script1.js", "./scripts/script2.js", "./scripts/script3.js"]).then(function(script) {
+                console.log("sequence:", script);
             });
         });
     </script>
