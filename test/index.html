@@ -1,9 +1,22 @@
 <html>
-    <head>
-        <title>Inscript.js</title>
-        <script src="../dist/inscript.js"></script>
-    </head>
-    <body>
-        
-    </body>
+
+<head>
+    <title>Inscript.js</title>
+    <script src="../dist/inscript.js" asinc></script>
+</head>
+
+<body>
+    Inscript test
+    <button id="btnLoadScripts">Load Scipts</button>
+    <script>
+        var btn = document.getElementById("btnLoadScripts");
+
+        btn.addEventListener("click", function() {
+            window.inscript(["./scripts/script1.js", "./scripts/script2.js", "./scripts/script3.js"]).then(function(script) {
+                console.log("loaded:", script);
+            });
+        });
+    </script>
+</body>
+
 </html>

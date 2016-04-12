@@ -7,11 +7,9 @@
         appendToHead: false
     };
 
-    const docScripts = Array.prototype.slice.call(document.scripts).filter((script) => Boolean(script.src));
+    let docScripts;
     const scriptTemplate = document.createElement("script");
-    const head = document.head;
-    const body = document.body || head;
-
+    const aps = Array.prototype.slice;
     /**
      * @method
      * @param {String|Array} scripts
@@ -19,24 +17,33 @@
      * @param {Object} [options]
      */
     window.inscript = window.inscript || function inscript(scripts, validate, options) {
-        const scriptsType = typeof (scripts);
-
-        if (!/string|array/.test(scriptsType)) {
-            new Error("Scripts are not provided or of the wrong type");
+        if (!scripts) {
+            new Error("Scripts are not provided");
         }
 
+        updateDocScripts();
+
+        const head = document.head;
+        const body = document.body || head;
         const config = Object.assign({}, defaults, options);
-        let chain = [];
+        const chain = Array.isArray(scripts) ? scripts : [scripts];
+        const buffer = document.createDocumentFragment();
+        const promiseChain = chain.map((script) => loadScript(script, validate, config, buffer));
 
-        if ("string" === scriptsType) {
-            chain.push(scripts);
+        if (config.appendToHead) {
+            head.appendChild(buffer);
+        } else {
+            body.appendChild(buffer);
         }
 
-        const promiseChain = chain.map((script) => loadScript(script, validate, config));
-
-        return Promise.all(promiseChain);
+        return Promise.all(promiseChain)
+            .then(updateDocScripts);
     };
 
+    function updateDocScripts(scripts) {
+        docScripts = aps.call(document.scripts).filter((script) => Boolean(script.src));
+        return scripts;
+    }
     /**
      * Checks if script is already loaded in the document
      * @private
@@ -56,9 +63,10 @@
      * @private
      * @param {String|Array} src
      * @param {Object} config
+     * @param {DocumentFragment} buffer
      * @returns {Promise}
      */
-    function loadScript(src, validate, config) {
+    function loadScript(src, validate, config, buffer) {
         if (Array.isArray(src)) {
             return window.inscript(src, validate, config);
         }
@@ -74,7 +82,7 @@
 
             newScript.onload = function() {
                 if (shouldValidate && !validate(src)) {
-                    reject(`Unable to validate script ${ src }`);
+                    reject(`Unable to validate script ${src}`);
                 }
 
                 accept(src);
@@ -84,11 +92,7 @@
             newScript.src = src;
             newScript.async = config.async;
 
-            if (config.appendToHead) {
-                head.appendChild(newScript);
-            } else {
-                body.appendChild(newScript);
-            }
+            buffer.appendChild(newScript);
         });
     }
 
