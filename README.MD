@@ -67,7 +67,7 @@ window.inscript("scripts/my-script.js", validate).then(function() {
 });
 ```
 
-##### Using options to append script to document head w/async flagg off
+##### Using options to append script to document head w/async flag off
 
 ```js
 window.inscript("scripts/my-script.js", null, { appendToHead: true, async: false }).then(function() {
