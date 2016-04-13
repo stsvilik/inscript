@@ -9,8 +9,10 @@
     Inscript test
     <br/>
     <button id="btnLoadScripts">Load Scipts</button>
-    <br/>    
+    <br/>
     <button id="btnLoadSequence">Load Sequence</button>
+    <br/>
+    <button id="btnLoadValidated">Load Validated</button>
     <script>
         var btn = document.getElementById("btnLoadScripts");
 
@@ -19,14 +21,36 @@
                 console.log("loaded:", script);
             });
         });
-        
+
         var btn2 = document.getElementById("btnLoadSequence");
 
         btn2.addEventListener("click", function() {
-            window.inscript([["./scripts/script4.js", "./scripts/script5.js"], "./scripts/script1.js", "./scripts/script2.js", "./scripts/script3.js"]).then(function(script) {
+            window.inscript([
+                ["./scripts/script4.js", "./scripts/script5.js"], "./scripts/script1.js", "./scripts/script2.js", "./scripts/script3.js"
+            ]).then(function(script) {
                 console.log("sequence:", script);
             });
         });
+
+        var btn3 = document.getElementById("btnLoadValidated");
+
+
+
+        btn3.addEventListener("click", function() {
+            console.time("Loading");
+            window.inscript("./scripts/script1.js", validation()).then(function(script) {
+                console.log("loaded:", script);
+                console.timeEnd("Loading");
+            });
+        });
+
+        function validation() {
+            return new Promise(function(accept, reject) {
+                setTimeout(function() {
+                    accept();
+                }, 2000);
+            });
+        }
     </script>
 </body>
 

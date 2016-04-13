@@ -13,7 +13,7 @@ The difference is interface and a few extra enhancements. To those who are famil
 
 #### Interface
 ```js
-window.inscript({String|Array} scripts, {Function} [validate], {Object} [options]) => {Promise}
+window.inscript({String|Array} scripts, {Function|Promise} [validate], {Object} [options]) => {Promise}
 ```
 
 #### Options
@@ -63,6 +63,21 @@ function validate() {
 }
 
 window.inscript("scripts/my-script.js", validate).then(function() {
+   //do something when script is injected
+});
+```
+
+##### Validate using a Promise
+Sometimes you need more time to confirm if script is ready
+
+```js
+function validate() {
+    return new Promise(function(accept, reject){
+        setTimeout(accept, 2000);
+    });    
+}
+
+window.inscript("scripts/my-script.js", validate()).then(function() {
    //do something when script is injected
 });
 ```

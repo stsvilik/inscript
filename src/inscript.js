@@ -3,9 +3,9 @@ import Promise from "promise-polyfill";
 import setAsap from "setasap";
 
 (function(window, document) {
-    
+
     Promise._setImmediateFn(setAsap);
-    
+
     const defaults = {
         async: true,
         useRaf: true,
@@ -70,6 +70,7 @@ import setAsap from "setasap";
      * @private
      * @param {String|Array} src
      * @param {Object} config
+     * @param {Function|Promise} validate
      * @param {DocumentFragment} buffer
      * @returns {Promise}
      */
@@ -79,7 +80,7 @@ import setAsap from "setasap";
         }
 
         return new Promise((accept, reject) => {
-            const shouldValidate = typeof (validate) === "function";
+            const shouldValidate = typeof validate === "function" || typeof validate === "object";
             const newScript = scriptTemplate.cloneNode(false);
 
             if (config.preventDuplicates && isScriptLoaded(src, config.shallowScan)) {
@@ -88,12 +89,15 @@ import setAsap from "setasap";
             }
 
             newScript.onload = function() {
-                if (shouldValidate && !validate(src)) {
-                    reject(`Unable to validate script ${src}`);
+                newScript.onload = null;
+
+                if (shouldValidate) {
+                    promisify(validate, src)
+                        .then(accept, reject);
+                    return;
                 }
 
                 accept(src);
-                newScript.onload = null;
             };
 
             newScript.src = src;
@@ -101,6 +105,26 @@ import setAsap from "setasap";
 
             buffer.appendChild(newScript);
         });
+    }
+
+    /**
+     * @private
+     * @param {Function|Promise} validation
+     * @param {String} src
+     * @returns {Promise}
+     */
+    function promisify(validation, src) {
+        if (typeof validation.then === "function") {
+            return validation.then(() => src);
+        } else {
+            return new Promise((accept, reject) => {
+                if (validation()) {
+                    accept(src);
+                    return;
+                }
+                reject(`Unable to validate script ${src}`);
+            });
+        }
     }
 
 })(window, document);
