@@ -1,4 +1,11 @@
+import "./object-assign";
+import Promise from "promise-polyfill";
+import setAsap from "setasap";
+
 (function(window, document) {
+    
+    Promise._setImmediateFn(setAsap);
+    
     const defaults = {
         async: true,
         useRaf: true,

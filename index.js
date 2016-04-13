@@ -1,1 +1,1 @@
-require("./lib/inscript");
+require("./dist/inscript");
