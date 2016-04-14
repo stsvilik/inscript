@@ -1,4 +1,5 @@
-### Inscript (Promisified Script Loader)
+Inscript (Promisified Script Loader)
+========
 *"Why load scripts - just inscript'em!"*
 
 Inscript is yet another attempt to streamline loading/injection of scripts dependencies into your document. 
@@ -14,7 +15,7 @@ The difference is interface and a few extra enhancements. To those who are famil
 ```js
 window.inscript({String|Array} scripts, {Object} [options]) => {Promise( status )}
 ```
-*status* - an argument which is passed into a then handler. It has a hash of script sources mapped to a loaded status flag.
+**status** - an argument which is passed into a then handler. It has a hash of script sources mapped to a loaded status flag.
 
 Ex: 
 ```js
@@ -29,10 +30,10 @@ window.inscript(["scripts/script1.js", "scripts/script2.js"]).then(function(stat
 #### Options
 These are optional configurations which are passed into your inscript call
 
-* async - Sets async flag on injected script and thus instructs browser to load script at its own discretion (Default: true)
-* appendToHead - instructs inscript to append script to head (Default: false)
-* preventDuplicates - instructs inscript to check if script with same name has already been loaded (Default: true)
-* shallowScan - will check for duplicates using relative short path. For exact match, script path must be absolute. (Default: true) 
+* **async** - Sets async flag on injected script and thus instructs browser to load script at its own discretion (Default: true)
+* **appendToHead** - instructs inscript to append script to head (Default: false)
+* **preventDuplicates** - instructs inscript to check if script with same name has already been loaded (Default: true)
+* **shallowScan** - will check for duplicates using relative short path. For exact match, script path must be absolute. (Default: true) 
 
 #### Examples
 
@@ -82,7 +83,7 @@ window.inscript("scripts/my-script.js").then(validate).then(function() {
 ##### Using options to append script to document head w/async flag off
 
 ```js
-window.inscript("scripts/my-script.js", null, { appendToHead: true, async: false }).then(function() {
+window.inscript("scripts/my-script.js", { appendToHead: true, async: false }).then(function() {
    //do something when script is injected
 });
 ```
@@ -92,7 +93,7 @@ Because inscript is promise based you can chain injections as you'd like
 
 ```js
 
-window.inscript("scripts/important.js", null, { appendToHead: true, async: false })
+window.inscript("scripts/important.js", { appendToHead: true, async: false })
     .then( window.inscript(["scripts/dependent.js", "scripts/irrelevant.js"]) )
     .then(function() {
        //all of my scripts are loaded 
