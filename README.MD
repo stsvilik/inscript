@@ -98,3 +98,15 @@ window.inscript("scripts/important.js", null, { appendToHead: true, async: false
        //all of my scripts are loaded 
     });
 ```
+
+#### Contributing
+
+1. Fork this repository
+2. Clone fork to your local machine
+3. Add remote ```git remote add upstream https://github.com/stsvilik/inscript.git```
+4. Rebase against upstream/master to get latest code ```git rebase upstream/master```
+5. Run ```npm install``` to install dependencies
+6. Run ```npm run build``` to build dist
+7. Change code in a new branch and commit with clear message
+8. Push changes to origin
+9. Issue a PR (Pull Request)
