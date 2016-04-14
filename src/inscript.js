@@ -6,9 +6,15 @@ import setAsap from "setasap";
 
     Promise._setImmediateFn(setAsap);
 
+    /**
+     * @typedef {Object} InscriptOptions
+     * @param {Boolean} async
+     * @param {Boolean} preventDuplicates
+     * @param {Boolean} shallowScan
+     * @param {Boolean} appendToHead
+     */
     const defaults = {
         async: true,
-        useRaf: true,
         preventDuplicates: true,
         shallowScan: true,
         appendToHead: false
@@ -20,10 +26,9 @@ import setAsap from "setasap";
     /**
      * @method
      * @param {String|Array} scripts
-     * @param {Function} [validate] Function which determines validitiy of loaded script(s)
-     * @param {Object} [options]
+     * @param {InscriptOptions} [options]
      */
-    window.inscript = window.inscript || function inscript(scripts, validate, options) {
+    window.inscript = window.inscript || function inscript(scripts, options) {
         if (!scripts) {
             new Error("Scripts are not provided");
         }
@@ -35,7 +40,7 @@ import setAsap from "setasap";
         const config = Object.assign({}, defaults, options);
         const chain = Array.isArray(scripts) ? scripts : [scripts];
         const buffer = document.createDocumentFragment();
-        const promiseChain = chain.map((script) => loadScript(script, validate, config, buffer));
+        const promiseChain = chain.map((script) => loadScript(script, config, buffer));
 
         if (config.appendToHead) {
             head.appendChild(buffer);
@@ -44,6 +49,7 @@ import setAsap from "setasap";
         }
 
         return Promise.all(promiseChain)
+            .then((scripts) => scripts.reduce((result, script) => Object.assign(result, script.src ? { [script.src]: script.loaded } : script), {}))
             .then(updateDocScripts);
     };
 
@@ -70,34 +76,30 @@ import setAsap from "setasap";
      * @private
      * @param {String|Array} src
      * @param {Object} config
-     * @param {Function|Promise} validate
      * @param {DocumentFragment} buffer
      * @returns {Promise}
      */
-    function loadScript(src, validate, config, buffer) {
+    function loadScript(src, config, buffer) {
         if (Array.isArray(src)) {
-            return window.inscript(src, validate, config);
+            return window.inscript(src, config);
         }
 
-        return new Promise((accept, reject) => {
-            const shouldValidate = typeof validate === "function" || typeof validate === "object";
+        return new Promise((accept) => {
             const newScript = scriptTemplate.cloneNode(false);
 
             if (config.preventDuplicates && isScriptLoaded(src, config.shallowScan)) {
-                accept(src);
+                accept({ src, loaded: true });
                 return;
             }
 
             newScript.onload = function() {
                 newScript.onload = null;
+                accept({ src, loaded: true });
+            };
 
-                if (shouldValidate) {
-                    promisify(validate, src)
-                        .then(accept, reject);
-                    return;
-                }
-
-                accept(src);
+            newScript.onerror = function() {
+                newScript.onerror = null;
+                accept({ src, loaded: false });
             };
 
             newScript.src = src;
@@ -105,26 +107,6 @@ import setAsap from "setasap";
 
             buffer.appendChild(newScript);
         });
-    }
-
-    /**
-     * @private
-     * @param {Function|Promise} validation
-     * @param {String} src
-     * @returns {Promise}
-     */
-    function promisify(validation, src) {
-        if (typeof validation.then === "function") {
-            return validation.then(() => src);
-        } else {
-            return new Promise((accept, reject) => {
-                if (validation()) {
-                    accept(src);
-                    return;
-                }
-                reject(`Unable to validate script ${src}`);
-            });
-        }
     }
 
 })(window, document);

@@ -9,12 +9,22 @@ The difference is interface and a few extra enhancements. To those who are famil
 * Sequencing - you may load script in sequence groups
 * Configurable insertion - you may choose to inject script into body or head (Default: body)
 * Configurable async - you may configure script loading with async flag on or off (Default: on)
-* Script validation - you may offer a function which verifies that script is ready for consumption before acting on it
 
 #### Interface
 ```js
-window.inscript({String|Array} scripts, {Function|Promise} [validate], {Object} [options]) => {Promise}
+window.inscript({String|Array} scripts, {Object} [options]) => {Promise( status )}
 ```
+*status* - an argument which is passed into a then handler. It has a hash of script sources mapped to a loaded status flag.
+
+Ex: 
+```js
+window.inscript(["scripts/script1.js", "scripts/script2.js"]).then(function(status){
+   if(status["scripts/script1.js"]) {
+        //"scripts/script1.js" is loaded successfully   
+   }
+});
+```
+
 
 #### Options
 These are optional configurations which are passed into your inscript call
@@ -54,21 +64,8 @@ window.inscript(["scripts/script1.js", "scripts/script2.js", ["scripts/script3.j
     });
 ```
 
-##### Validate script
-Validate if script is indeed ready for consumption. This usually applies to scripts that are expected to set a global property
-
-```js
-function validate() {
-    return window.MyScript !== undefined;    
-}
-
-window.inscript("scripts/my-script.js", validate).then(function() {
-   //do something when script is injected
-});
-```
-
 ##### Validate using a Promise
-Sometimes you need more time to confirm if script is ready
+Sometimes you need more time to confirm if script is ready - for that you can use promises
 
 ```js
 function validate() {
@@ -77,8 +74,8 @@ function validate() {
     });    
 }
 
-window.inscript("scripts/my-script.js", validate()).then(function() {
-   //do something when script is injected
+window.inscript("scripts/my-script.js").then(validate).then(function() {
+   //do something when script is injected and validated
 });
 ```
 
