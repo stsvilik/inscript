@@ -34,11 +34,9 @@
 
         var btn3 = document.getElementById("btnLoadValidated");
 
-
-
         btn3.addEventListener("click", function() {
             console.time("Loading");
-            window.inscript("./scripts/script1.js", validation()).then(function(script) {
+            window.inscript("./scripts/script1.js").then(validation).then(function(script) {
                 console.log("loaded:", script);
                 console.timeEnd("Loading");
             });
