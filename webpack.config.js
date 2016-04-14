@@ -2,9 +2,10 @@ module.exports = {
     entry: "./src/inscript.js",
     output: {
         path: "./dist",
-        filename: "inscript.js"
+        filename: "inscript.js",
+        devtoolModuleFilenameTemplate: "//[absolute-resource-path]"
     },
-    devtool: "source-map",
+    devtool: "#source-map",
     module: {
         loaders: [
             {
